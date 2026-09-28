@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="description" content="A free falling-block puzzle game with SRS rotation, ghost piece, hold, combos, and mobile controls. Play online or install for offline play." />
+  <meta name="theme-color" content="#0a0a1a" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Falling Blocks — Free Puzzle Game" />
+  <meta property="og:description" content="Stack, clear lines, and chase high scores. Free browser-based falling-block puzzle game." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://yourusername.github.io/falling-blocks/" />
+  <meta property="og:image" content="icon-512.png" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Falling Blocks — Free Puzzle Game" />
+  <meta name="twitter:description" content="Stack, clear lines, and chase high scores. Free browser-based falling-block puzzle game." />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="icon-192.png" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+
+  <!-- Manifest -->
+  <link rel="manifest" href="manifest.json" />
+
+  <title>Falling Blocks — Free Puzzle Game</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Main Menu -->
+    <section id="menu-screen" class="screen active" aria-label="Main menu">
+      <h1 class="logo">FALLING<span>BLOCKS</span></h1>
+      <p class="tagline">Stack. Clear. Survive.</p>
+      <nav class="menu-nav">
+        <button id="btn-play" class="btn btn-primary" aria-label="Play game">▶ Play</button>
+        <button id="btn-settings" class="btn" aria-label="Open settings">⚙ Settings</button>
+        <button id="btn-help" class="btn" aria-label="Open help">? Help</button>
+      </nav>
+      <p class="high-score-display">High Score: <span id="menu-high-score">0</span></p>
+    </section>
+
+    <!-- Settings Screen -->
+    <section id="settings-screen" class="screen" aria-label="Settings">
+      <h2>Settings</h2>
+      <div class="settings-list">
+        <label class="setting-row">
+          <span>Sound Effects</span>
+          <input type="checkbox" id="setting-sound" checked aria-label="Toggle sound effects" />
+        </label>
+        <label class="setting-row">
+          <span>Reduced Motion</span>
+          <input type="checkbox" id="setting-motion" aria-label="Toggle reduced motion" />
+        </label>
+        <label class="setting-row">
+          <span>Colorblind Palette</span>
+          <input type="checkbox" id="setting-colorblind" aria-label="Toggle colorblind-friendly palette" />
+        </label>
+        <label class="setting-row">
+          <span>Ghost Piece</span>
+          <input type="checkbox" id="setting-ghost" checked aria-label="Toggle ghost piece" />
+        </label>
+      </div>
+      <div class="settings-actions">
+        <button id="btn-remap" class="btn" aria-label="Remap keys">Remap Keys</button>
+        <button id="btn-settings-back" class="btn btn-primary" aria-label="Back to menu">Back</button>
+      </div>
+    </section>
+
+    <!-- Help Screen -->
+    <section id="help-screen" class="screen" aria-label="Help">
+      <h2>How to Play</h2>
+      <div class="help-content">
+        <h3>Keyboard</h3>
+        <ul>
+          <li><kbd>←</kbd> <kbd>→</kbd> Move left / right</li>
+          <li><kbd>↓</kbd> Soft drop</li>
+          <li><kbd>↑</kbd> Rotate clockwise</li>
+          <li><kbd>Z</kbd> / <kbd>Q</kbd> Rotate counter-clockwise</li>
+          <li><kbd>X</kbd> / <kbd>E</kbd> Rotate clockwise</li>
+          <li><kbd>Space</kbd> Hard drop</li>
+          <li><kbd>C</kbd> / <kbd>Shift</kbd> Hold piece</li>
+          <li><kbd>P</kbd> / <kbd>Esc</kbd> Pause</li>
+          <li><kbd>R</kbd> Restart</li>
+        </ul>
+        <h3>Mobile</h3>
+        <ul>
+          <li>Swipe left / right to move</li>
+          <li>Swipe down to soft drop</li>
+          <li>Swipe up to hard drop</li>
+          <li>Tap to rotate</li>
+          <li>On-screen buttons available</li>
+        </ul>
+        <h3>Scoring</h3>
+        <ul>
+          <li>Single: 100 × level</li>
+          <li>Double: 300 × level</li>
+          <li>Triple: 500 × level</li>
+          <li>Tetris (4 lines): 800 × level</li>
+          <li>T-Spin bonuses available</li>
+          <li>Combos and back-to-back multipliers</li>
+        </ul>
+      </div>
+      <button id="btn-help-back" class="btn btn-primary" aria-label="Back to menu">Back</button>
+    </section>
+
+    <!-- Game Screen -->
+    <section id="game-screen" class="screen" aria-label="Game">
+      <div class="game-layout">
+        <!-- Left panel: Hold + Stats -->
+        <aside class="side-panel left-panel">
+          <div class="panel-section">
+            <h3>Hold</h3>
+            <canvas id="hold-canvas" width="120" height="120" aria-label="Hold piece"></canvas>
+          </div>
+          <div class="panel-section stats">
+            <div class="stat"><span>Score</span><strong id="stat-score">0</strong></div>
+            <div class="stat"><span>Level</span><strong id="stat-level">1</strong></div>
+            <div class="stat"><span>Lines</span><strong id="stat-lines">0</strong></div>
+            <div class="stat"><span>High</span><strong id="stat-high">0</strong></div>
+          </div>
+        </aside>
+
+        <!-- Center: Playfield -->
+        <main class="playfield-wrapper">
+          <canvas id="game-canvas" width="300" height="600" aria-label="Game playfield"></canvas>
+          <div id="pause-overlay" class="overlay hidden" aria-label="Pause menu">
+            <h2>Paused</h2>
+            <button id="btn-resume" class="btn btn-primary" aria-label="Resume game">Resume</button>
+            <button id="btn-restart-pause" class="btn" aria-label="Restart game">Restart</button>
+            <button id="btn-quit" class="btn" aria-label="Quit to menu">Quit</button>
+          </div>
+          <div id="gameover-overlay" class="overlay hidden" aria-label="Game over">
+            <h2>Game Over</h2>
+            <p>Score: <strong id="final-score">0</strong></p>
+            <p>Lines: <strong id="final-lines">0</strong></p>
+            <p>Level: <strong id="final-level">1</strong></p>
+            <p id="new-high" class="new-high hidden">New High Score!</p>
+            <button id="btn-restart-gameover" class="btn btn-primary" aria-label="Play again">Play Again</button>
+            <button id="btn-menu-gameover" class="btn" aria-label="Back to menu">Menu</button>
+          </div>
+        </main>
+
+        <!-- Right panel: Next queue -->
+        <aside class="side-panel right-panel">
+          <div class="panel-section">
+            <h3>Next</h3>
+            <canvas id="next-canvas" width="120" height="360" aria-label="Next pieces"></canvas>
+          </div>
+          <div class="panel-section controls-help">
+            <h3>Controls</h3>
+            <p><kbd>←</kbd><kbd>→</kbd> Move</p>
+            <p><kbd>↓</kbd> Soft</p>
+            <p><kbd>Space</kbd> Hard</p>
+            <p><kbd>Z</kbd>/<kbd>X</kbd> Rotate</p>
+            <p><kbd>C</kbd> Hold</p>
+            <p><kbd>P</kbd> Pause</p>
+          </div>
+        </aside>
+      </div>
+
+      <!-- Mobile touch controls -->
+      <div id="mobile-controls" class="mobile-controls hidden" aria-label="Mobile controls">
+        <div class="mobile-row">
+          <button class="touch-btn" data-action="left" aria-label="Move left">←</button>
+          <button class="touch-btn" data-action="rotate-ccw" aria-label="Rotate counter-clockwise">↺</button>
+          <button class="touch-btn" data-action="rotate-cw" aria-label="Rotate clockwise">↻</button>
+          <button class="touch-btn" data-action="right" aria-label="Move right">→</button>
+        </div>
+        <div class="mobile-row">
+          <button class="touch-btn wide" data-action="soft-drop" aria-label="Soft drop">↓</button>
+          <button class="touch-btn wide" data-action="hard-drop" aria-label="Hard drop">⤓</button>
+          <button class="touch-btn" data-action="hold" aria-label="Hold piece">H</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
